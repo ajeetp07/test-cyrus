@@ -129,6 +129,9 @@
     function saveEdit(id, newText) {
       const t = todos.find(t => t.id === id);
       if (!t) return;
+      const trimmed = newText.trim();
+      if (!trimmed) return;
+      t.text = trimmed;
       t.editing = false;
       render();
     }
