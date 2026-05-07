@@ -101,7 +101,11 @@
         const delBtn = document.createElement('button');
         delBtn.className = 'danger';
         delBtn.textContent = 'Delete';
-        delBtn.addEventListener('click', () => deleteTodo(t.id));
+        delBtn.addEventListener('click', () => {
+          if (window.confirm(`Delete "${t.text}"?`)) {
+            deleteTodo(t.id);
+          }
+        });
 
         li.append(text, editInput, editBtn, delBtn);
         listEl.appendChild(li);
