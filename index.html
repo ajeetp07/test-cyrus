@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Todo App</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 0 16px;
+    color: #222;
+  }
+  h1 { margin-bottom: 16px; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  input[type="text"] {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  button {
+    padding: 8px 14px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fafafa;
+    cursor: pointer;
+  }
+  button:hover { background: #eee; }
+  button.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  button.primary:hover { background: #1d4ed8; }
+  button.danger { color: #b91c1c; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  li .text { flex: 1; }
+  li.editing .text { display: none; }
+  li .edit-input { flex: 1; display: none; padding: 6px; font-size: 14px; }
+  li.editing .edit-input { display: block; }
+  .empty { color: #888; font-style: italic; padding: 12px 0; }
+</style>
+</head>
+<body>
+  <h1>Todos</h1>
+
+  <div class="add-row">
+    <input id="new-todo" type="text" placeholder="What needs doing?" />
+    <button class="primary" id="add-btn">Add</button>
+  </div>
+
+  <ul id="list"></ul>
+
+  <script>
+    let todos = [];
+    let nextId = 1;
+
+    const listEl = document.getElementById('list');
+    const inputEl = document.getElementById('new-todo');
+
+    function render() {
+      listEl.innerHTML = '';
+      if (todos.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'No todos yet.';
+        listEl.appendChild(empty);
+        return;
+      }
+      for (const t of todos) {
+        const li = document.createElement('li');
+        li.dataset.id = t.id;
+        if (t.editing) li.classList.add('editing');
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = t.text;
+
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.className = 'edit-input';
+        editInput.value = t.text;
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = t.editing ? 'Save' : 'Edit';
+        editBtn.addEventListener('click', () => {
+          if (t.editing) {
+            saveEdit(t.id, editInput.value);
+          } else {
+            startEdit(t.id);
+          }
+        });
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'danger';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => deleteTodo(t.id));
+
+        li.append(text, editInput, editBtn, delBtn);
+        listEl.appendChild(li);
+      }
+    }
+
+    function addTodo(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      todos.push({ id: nextId++, text: trimmed, editing: false });
+      render();
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter(t => t.id !== id);
+      render();
+    }
+
+    function startEdit(id) {
+      const t = todos.find(t => t.id === id);
+      if (t) t.editing = true;
+      render();
+    }
+
+    function saveEdit(id, newText) {
+      const t = todos.find(t => t.id === id);
+      if (!t) return;
+      t.editing = false;
+      render();
+    }
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+      addTodo(inputEl.value);
+      inputEl.value = '';
+      inputEl.focus();
+    });
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        addTodo(inputEl.value);
+        inputEl.value = '';
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
